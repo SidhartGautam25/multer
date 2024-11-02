@@ -29,6 +29,7 @@ function Multer(options) {
   // and allowall does a very simple thing
   // it calls the callback function with parameteres null and true
   this.fileFilter = options.fileFilter || allowAll;
+  console.log("in Multer constructor ", this);
 }
 
 Multer.prototype._makeMiddleware = function (fields, fileStrategy) {
