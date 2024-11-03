@@ -5,18 +5,24 @@ var memoryStorage = require("./storage/memory");
 var MulterError = require("./lib/multer-error");
 
 function allowAll(req, file, cb) {
+  console.log("you are inside allowAll");
+  console.log("calling my callback function");
   cb(null, true);
 }
 
 function Multer(options) {
+  console.log("Multer get called");
   if (options.storage) {
+    console.log("first case is true");
     this.storage = options.storage;
     // so this object's storage property is a object
     // and this object has two things
     // getFilename and getDestination
   } else if (options.dest) {
+    console.log("second case is true");
     this.storage = diskStorage({ destination: options.dest });
   } else {
+    console.log("third case is true");
     this.storage = memoryStorage();
   }
 
@@ -38,14 +44,17 @@ Multer.prototype._makeMiddleware = function (fields, fileStrategy) {
   // fields is an array of obejct,and that object has
   // property like name whose value for us is "file" and maxCount whose value is 1
   // and fileStrategy is a string whose value is "VALUE"
+  console.log("inside _makeMiddleware method");
 
   function setup() {
+    console.log("inside setup method");
     var fileFilter = this.fileFilter;
     var filesLeft = Object.create(null);
 
     // fields has basically one object
     // so what this whole loop is doing is setting file property
     // of filesLeft to 1
+    console.log("fields is ", fields);
     fields.forEach(function (field) {
       // yes maxCount is a number whose value is 1
       if (typeof field.maxCount === "number") {
@@ -56,8 +65,10 @@ Multer.prototype._makeMiddleware = function (fields, fileStrategy) {
         filesLeft[field.name] = Infinity;
       }
     });
+    console.log("filesLeft after the loop is ", filesLeft);
 
     function wrappedFileFilter(req, file, cb) {
+      console.log("inside wrappedFileFilter");
       if ((filesLeft[file.fieldname] || 0) <= 0) {
         // this is useless for us
         return cb(new MulterError("LIMIT_UNEXPECTED_FILE", file.fieldname));
@@ -66,6 +77,10 @@ Multer.prototype._makeMiddleware = function (fields, fileStrategy) {
       filesLeft[file.fieldname] -= 1;
       // basically wrappedFileFilter is cally fileFilter function
       // which in return just call the passed  callback function
+      console.log(
+        "calling fileFiler and providing req object and file and a callback fun"
+      );
+      console.log("file look like this ", file);
       fileFilter(req, file, cb);
     }
 
@@ -75,6 +90,15 @@ Multer.prototype._makeMiddleware = function (fields, fileStrategy) {
     // storage basically is equal to storage which is an object with two properties
     // fileFilter is equal to wrappedFileFilter
     // file strategy is a string whose value is equal to "VALUE"
+    console.log("returning from setup method");
+    let temp = {
+      limits: this.limits,
+      preservePath: this.preservePath,
+      storage: this.storage,
+      fileFilter: wrappedFileFilter,
+      fileStrategy: fileStrategy,
+    };
+    console.log("returning object from setup method looks like this ", temp);
     return {
       limits: this.limits,
       preservePath: this.preservePath,
@@ -88,10 +112,13 @@ Multer.prototype._makeMiddleware = function (fields, fileStrategy) {
   // so makeMiddleware take a object as a argument and that object has
   // five properties
   // and this makeMiddleware is the most fucking thing here
+  console.log("calling makeMiddleware method and providing setup.bind(this)");
   return makeMiddleware(setup.bind(this));
 };
 
 Multer.prototype.single = function (name) {
+  console.log("single method get called");
+  console.log("calling _makeMiddleware");
   return this._makeMiddleware([{ name: name, maxCount: 1 }], "VALUE");
   // here name is a string whose value is file
   // so basically this single method is calling _makeMiddleware method on
@@ -125,6 +152,7 @@ Multer.prototype.single = function (name) {
 // }
 
 function multer(options) {
+  console.log("multer get called ");
   if (options === undefined) {
     return new Multer({});
   }
