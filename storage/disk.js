@@ -56,30 +56,6 @@ DiskStorage.prototype._handleFile = function _handleFile(req, file, cb) {
   });
 };
 
-DiskStorage.prototype._removeFile = function _removeFile(req, file, cb) {
-  var path = file.path;
-
-  delete file.destination;
-  delete file.filename;
-  delete file.path;
-
-  fs.unlink(path, cb);
-};
-
 module.exports = function (opts) {
-  // opts is just an object with two main properties
-  // filename and destination
-  // and they look something like this
-  //  destination: (req, file, cb) => {
-  //   cb(null, uploadDir);
-  // },
-  // filename: (req, file, cb) => {
-  //   cb(null, Date.now() + path.extname(file.originalname));
-  // },
-
-  // and if you observe these are just a function which under the hood,
-  // just call the callback function
   return new DiskStorage(opts);
-  // so basically this set the getFilename and getDestination
-  // that's it.
 };
